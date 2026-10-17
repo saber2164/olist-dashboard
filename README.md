@@ -1,19 +1,21 @@
-# Olist E-Commerce KPI Dashboard
+# Olist E-Commerce Analytics
 
 Interactive analytics dashboard for the Olist Brazilian E-Commerce dataset, built on a modern local batch warehouse (DuckDB + dbt).
 
-## Live Dashboard
+## Live Site
 
-View the dashboard: https://YOURUSER.github.io/olist-dashboard/dashboard.html
+**Website:** https://saber2164.github.io/olist-dashboard/
+
+**Dashboard:** https://saber2164.github.io/olist-dashboard/dashboard.html
 
 ## What's included
 
 | File | Description |
 |------|-------------|
-| `dashboard.html` | Standalone interactive dashboard (open in any browser) |
+| `index.html` | Sleek, minimal website (Apple-inspired design) |
+| `dashboard.html` | Standalone interactive KPI dashboard |
 | `dashboard.py` | Python source to regenerate the dashboard |
 | `pbi_export/` | Parquet exports of all dbt mart models |
-| `olist.duckdb` | DuckDB analytical database (built by the dbt pipeline) |
 
 ## KPIs & charts
 
