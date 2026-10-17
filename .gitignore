@@ -11,10 +11,16 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+.~lock.*
 
 # Data / binary (too large for git)
 *.duckdb
 *.parquet
+*.zip
+*.csv
+
+# Environment variables
+.env
 
 # IDE
 .vscode/

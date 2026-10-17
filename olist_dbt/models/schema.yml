@@ -1,0 +1,310 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: Staging layer for orders - cleaned and typed
+    columns:
+      - name: order_id
+        description: Unique order identifier
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Customer who placed the order
+        tests:
+          - not_null
+      - name: order_status
+        description: Status of the order (delivered, shipped, canceled, etc.)
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['delivered', 'shipped', 'invoiced', 'created', 'approved', 'canceled', 'unavailable', 'processing']
+      - name: order_purchase_timestamp
+        description: Timestamp when the order was placed
+        tests:
+          - not_null
+      - name: order_approved_at
+        description: Timestamp when payment was approved
+      - name: order_delivered_carrier_date
+        description: Timestamp when order was handed to carrier
+      - name: order_delivered_customer_date
+        description: Timestamp when order was delivered to customer
+      - name: order_estimated_delivery_date
+        description: Estimated delivery date promised to customer
+
+  - name: stg_order_items
+    description: Staging layer for order items - cleaned and typed
+    columns:
+      - name: order_id
+        description: Order identifier
+        tests:
+          - not_null
+      - name: order_item_id
+        description: Item sequence number within an order
+        tests:
+          - not_null
+      - name: product_id
+        description: Product identifier
+        tests:
+          - not_null
+      - name: seller_id
+        description: Seller identifier
+        tests:
+          - not_null
+      - name: shipping_limit_date
+        description: Latest date the item should ship
+      - name: price
+        description: Item price in BRL
+        tests:
+          - not_null
+      - name: freight_value
+        description: Freight/shipping cost in BRL
+        tests:
+          - not_null
+
+  - name: stg_customers
+    description: Staging layer for customers - cleaned and typed
+    columns:
+      - name: customer_id
+        description: Unique customer identifier
+        tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        description: Unique customer across all orders (same person may have multiple customer_id)
+        tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        description: Customer zip code prefix
+      - name: customer_city
+        description: Customer city
+      - name: customer_state
+        description: Customer state (Brazilian state abbreviation, e.g. SP, RJ)
+
+  - name: stg_products
+    description: Staging layer for products - cleaned and typed
+    columns:
+      - name: product_id
+        description: Unique product identifier
+        tests:
+          - unique
+          - not_null
+      - name: product_category_name
+        description: Product category in Portuguese
+      - name: product_name_length
+        description: Length of product name
+      - name: product_description_length
+        description: Length of product description
+      - name: product_photos_qty
+        description: Number of product photos
+      - name: product_weight_g
+        description: Product weight in grams
+      - name: product_length_cm
+        description: Product length in cm
+      - name: product_height_cm
+        description: Product height in cm
+      - name: product_width_cm
+        description: Product width in cm
+
+  - name: stg_sellers
+    description: Staging layer for sellers - cleaned and typed
+    columns:
+      - name: seller_id
+        description: Unique seller identifier
+        tests:
+          - unique
+          - not_null
+      - name: seller_zip_code_prefix
+        description: Seller zip code prefix
+      - name: seller_city
+        description: Seller city
+      - name: seller_state
+        description: Seller state
+
+  - name: stg_payments
+    description: Staging layer for payments - cleaned and typed
+    columns:
+      - name: order_id
+        description: Order identifier
+        tests:
+          - not_null
+      - name: payment_sequential
+        description: Payment sequence number for the order
+      - name: payment_type
+        description: Payment type (credit_card, boleto, voucher, etc.)
+      - name: payment_installments
+        description: Number of installments
+      - name: payment_value
+        description: Payment value in BRL
+
+  - name: stg_reviews
+    description: Staging layer for reviews - cleaned and typed
+    columns:
+      - name: review_id
+        description: Unique review identifier
+        tests:
+          - not_null
+      - name: order_id
+        description: Order being reviewed
+        tests:
+          - not_null
+      - name: review_score
+        description: Review score (1-5)
+        tests:
+          - not_null
+      - name: review_creation_date
+        description: Date review was created
+      - name: review_answer_timestamp
+        description: Timestamp when seller answered the review
+
+  - name: stg_product_category_translation
+    description: Translates Portuguese product categories to English
+    columns:
+      - name: product_category_name
+        description: Product category in Portuguese
+      - name: product_category_name_english
+        description: Product category in English
+
+  - name: stg_geolocation
+    description: Geolocation data for zip code prefixes
+    columns:
+      - name: zip_code_prefix
+        description: Zip code prefix
+      - name: city
+        description: City name
+      - name: state
+        description: State abbreviation
+      - name: lat
+        description: Latitude
+      - name: lng
+        description: Longitude
+
+  - name: dim_date
+    description: Date dimension table with calendar attributes
+    columns:
+      - name: date_key
+        description: Date (YYYY-MM-DD)
+        tests:
+          - unique
+          - not_null
+      - name: year
+        description: Calendar year
+      - name: month
+        description: Calendar month (1-12)
+      - name: day
+        description: Day of month (1-31)
+      - name: day_of_week
+        description: Day of week (0=Sunday)
+      - name: day_name
+        description: Name of day (Monday, Tuesday, etc.)
+      - name: quarter
+        description: Quarter of year (1-4)
+      - name: year_month
+        description: Year and month (YYYY-MM)
+      - name: is_weekend
+        description: True if Saturday or Sunday
+
+  - name: dim_customers
+    description: Customer dimension - one row per customer (latest geography)
+    columns:
+      - name: customer_key
+        description: Surrogate key = customer_unique_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Customer identifier
+      - name: customer_zip_code_prefix
+        description: Customer zip code prefix
+      - name: customer_city
+        description: Customer city
+      - name: customer_state
+        description: Customer state
+
+  - name: dim_sellers
+    description: Seller dimension - one row per seller
+    columns:
+      - name: seller_key
+        description: Surrogate key = seller_id
+        tests:
+          - unique
+          - not_null
+      - name: seller_zip_code_prefix
+        description: Seller zip code prefix
+      - name: seller_city
+        description: Seller city
+      - name: seller_state
+        description: Seller state
+
+  - name: dim_products
+    description: Product dimension with English category names
+    columns:
+      - name: product_key
+        description: Surrogate key = product_id
+        tests:
+          - unique
+          - not_null
+      - name: product_category_name
+        description: Product category in Portuguese
+      - name: product_category_name_english
+        description: Product category translated to English
+      - name: product_weight_g
+        description: Product weight in grams
+      - name: product_length_cm
+        description: Product length in cm
+      - name: product_height_cm
+        description: Product height in cm
+      - name: product_width_cm
+        description: Product width in cm
+
+  - name: fct_order_items
+    description: Fact table - one row per order item within an order
+    columns:
+      - name: order_item_key
+        description: Surrogate key = order_id + order_item_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_key
+        description: Foreign key to dim_customers
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_key
+      - name: product_key
+        description: Foreign key to dim_products
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_key
+      - name: seller_key
+        description: Foreign key to dim_sellers
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_sellers')
+              field: seller_key
+      - name: order_date_key
+        description: Foreign key to dim_date (order date)
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: price
+        description: Item price in BRL
+        tests:
+          - not_null
+      - name: freight_value
+        description: Freight cost in BRL
+        tests:
+          - not_null
+      - name: item_total_cost
+        description: price + freight_value
+      - name: delivery_delay_days
+        description: Days delivered late (negative = early)
+      - name: order_purchase_timestamp
+        description: When the order was placed
+      - name: order_delivered_customer_date
+        description: When the order was delivered

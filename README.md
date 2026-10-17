@@ -8,14 +8,19 @@ Interactive analytics dashboard for the Olist Brazilian E-Commerce dataset, buil
 
 **Dashboard:** https://saber2164.github.io/olist-dashboard/dashboard.html
 
-## What's included
+## Data
 
-| File | Description |
-|------|-------------|
-| `index.html` | Sleek, minimal website (Apple-inspired design) |
-| `dashboard.html` | Standalone interactive KPI dashboard |
-| `dashboard.py` | Python source to regenerate the dashboard |
-| `pbi_export/` | Parquet exports of all dbt mart models |
+The raw Olist CSV dataset is **not** included in this repository (it's large). 
+
+Download it from Kaggle: https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce
+
+Extract the CSVs into `olist_data/`, then run:
+
+```bash
+python3 ingest_raw.py
+```
+
+This loads all CSVs into `olist.duckdb` under the `main_raw` schema.
 
 ## KPIs & charts
 

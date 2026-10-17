@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: olist_raw
+    schema: main_raw
+    tables:
+      - name: raw_customers
+        description: Raw customers dataset loaded from olist_customers_dataset.csv
+      - name: raw_order_items
+        description: Raw order items dataset loaded from olist_order_items_dataset.csv
+      - name: raw_orders
+        description: Raw orders dataset loaded from olist_orders_dataset.csv
+      - name: raw_payments
+        description: Raw payments dataset loaded from olist_order_payments_dataset.csv
+      - name: raw_products
+        description: Raw products dataset loaded from olist_products_dataset.csv
+      - name: raw_sellers
+        description: Raw sellers dataset loaded from olist_sellers_dataset.csv
+      - name: raw_reviews
+        description: Raw reviews dataset loaded from olist_order_reviews_dataset.csv
+      - name: raw_product_category_translation
+        description: Product category name translation table
+      - name: raw_geolocation
+        description: Raw geolocation dataset
