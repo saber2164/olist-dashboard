@@ -13,6 +13,9 @@ env/
 Thumbs.db
 .~lock.*
 
+# Logs
+logs/
+
 # Data / binary (too large for git)
 *.duckdb
 *.parquet
