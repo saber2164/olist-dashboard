@@ -54,12 +54,12 @@ def build_kpi_cards(data: dict[str, pd.DataFrame]) -> str:
     customers = data["dim_customers"]
     reviews = data["stg_reviews"]
 
-    total_revenue = fct["item_total_cost"].sum()
+    total_revenue = fct["total_item_cost"].sum()
     total_items = len(fct)
     on_time_rate = (fct["delivery_delay_days"].fillna(0) <= 0).mean() * 100
     avg_delay = fct["delivery_delay_days"].mean()
     avg_review = reviews["review_score"].mean()
-    total_customers = customers["customer_key"].nunique()
+    total_customers = customers["customer_id"].nunique()
 
     cards = [
         ("Total Revenue", f"${total_revenue:,.0f}", "Sum of price + freight across all order items"),
@@ -91,38 +91,36 @@ def build_figures(data: dict[str, pd.DataFrame]):
     reviews = data["stg_reviews"]
 
     # Merge fct with dimensions
-    fct_c = fct.merge(customers[["customer_key", "customer_state"]], on="customer_key", how="left")
-    fct_p = fct.merge(products[["product_key", "product_category_name_english"]], on="product_key", how="left")
-    fct_s = fct.merge(sellers[["seller_key", "seller_state"]], on="seller_key", how="left")
+    fct_c = fct.merge(customers[["customer_id", "customer_state"]], on="customer_id", how="left")
+    fct_p = fct.merge(products[["product_key", "product_category_name_english"]], left_on="product_id", right_on="product_key", how="left")
+    fct_s = fct.merge(sellers[["seller_key", "seller_state"]], left_on="seller_id", right_on="seller_key", how="left")
     fct_d = fct.merge(dates[["date_key", "year_month"]], left_on="order_date_key", right_on="date_key", how="left")
 
-    # Reviews live on stg_orders (order_id), so join fct -> stg_orders -> reviews via order_id
-    orders = data["stg_orders"][["order_id", "order_purchase_timestamp"]]
-    fct_o = fct.merge(orders, left_on="order_purchase_timestamp", right_on="order_purchase_timestamp", how="left")
-    fct_r = fct_o.merge(reviews[["order_id", "review_score"]], on="order_id", how="left")
+    # Reviews live on stg_orders (order_id), join fct.order_id -> reviews.order_id
+    fct_r = fct.merge(reviews[["order_id", "review_score"]], on="order_id", how="left")
 
     # 1. Revenue by customer state
     rev_state = (
-        fct_c.groupby("customer_state")["item_total_cost"]
+        fct_c.groupby("customer_state")["total_item_cost"]
         .sum()
         .reset_index()
-        .sort_values("item_total_cost", ascending=False)
+        .sort_values("total_item_cost", ascending=False)
         .head(15)
     )
     fig_state = px.bar(
         rev_state,
         x="customer_state",
-        y="item_total_cost",
+        y="total_item_cost",
         title="Revenue by Customer State (Top 15)",
-        labels={"item_total_cost": "Revenue ($)", "customer_state": "State"},
-        color="item_total_cost",
+        labels={"total_item_cost": "Revenue ($)", "customer_state": "State"},
+        color="total_item_cost",
         color_continuous_scale="Blues",
     )
     fig_state.update_layout(showlegend=False, height=400)
 
     # 2. Monthly revenue trend
     rev_month = (
-        fct_d.groupby("year_month")["item_total_cost"]
+        fct_d.groupby("year_month")["total_item_cost"]
         .sum()
         .reset_index()
         .sort_values("year_month")
@@ -130,48 +128,48 @@ def build_figures(data: dict[str, pd.DataFrame]):
     fig_month = px.line(
         rev_month,
         x="year_month",
-        y="item_total_cost",
+        y="total_item_cost",
         title="Monthly Revenue Trend",
-        labels={"item_total_cost": "Revenue ($)", "year_month": "Month"},
+        labels={"total_item_cost": "Revenue ($)", "year_month": "Month"},
         markers=True,
     )
     fig_month.update_layout(height=400)
 
     # 3. Top sellers by revenue
     rev_seller = (
-        fct_s.groupby("seller_state")["item_total_cost"]
+        fct_s.groupby("seller_state")["total_item_cost"]
         .sum()
         .reset_index()
-        .sort_values("item_total_cost", ascending=False)
+        .sort_values("total_item_cost", ascending=False)
         .head(10)
     )
     fig_seller = px.bar(
         rev_seller,
         x="seller_state",
-        y="item_total_cost",
+        y="total_item_cost",
         title="Revenue by Seller State (Top 10)",
-        labels={"item_total_cost": "Revenue ($)", "seller_state": "State"},
-        color="item_total_cost",
+        labels={"total_item_cost": "Revenue ($)", "seller_state": "State"},
+        color="total_item_cost",
         color_continuous_scale="Greens",
     )
     fig_seller.update_layout(showlegend=False, height=400)
 
     # 4. Revenue by product category
     rev_cat = (
-        fct_p.groupby("product_category_name_english")["item_total_cost"]
+        fct_p.groupby("product_category_name_english")["total_item_cost"]
         .sum()
         .reset_index()
-        .sort_values("item_total_cost", ascending=False)
+        .sort_values("total_item_cost", ascending=False)
         .head(10)
     )
     fig_cat = px.bar(
         rev_cat,
-        x="item_total_cost",
+        x="total_item_cost",
         y="product_category_name_english",
         orientation="h",
         title="Revenue by Product Category (Top 10)",
-        labels={"item_total_cost": "Revenue ($)", "product_category_name_english": "Category"},
-        color="item_total_cost",
+        labels={"total_item_cost": "Revenue ($)", "product_category_name_english": "Category"},
+        color="total_item_cost",
         color_continuous_scale="Oranges",
     )
     fig_cat.update_layout(showlegend=False, height=400, yaxis={"categoryorder": "total ascending"})

@@ -22,6 +22,7 @@ SELECT
     o.customer_id,
     oi.product_id,
     oi.seller_id,
+    CAST(o.order_purchase_timestamp AS DATE) AS order_date_key,
     o.order_purchase_timestamp,
     o.order_status,
     oi.price,
